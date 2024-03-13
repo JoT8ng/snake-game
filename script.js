@@ -11,6 +11,7 @@ let food = generateFood();
 let highScore = 0;
 let direction = 'right';
 let enemydirection = 'down';
+let multidirection = 'down';
 let gameInterval;
 let gameSpeedDelay = 200;
 let gameStarted = false;
@@ -125,25 +126,8 @@ function move() {
 }
 
 // Move enemy snake
-function moveEnemy(state, direction) {
-  if (state === 'multiplayer') {
-    console.log('enemy is in multiplayer mode')
-    console.log(direction)
-    switch (direction) {
-      case 'ArrowUp':
-        enemydirection = 'up';
-        break;
-      case 'ArrowDown':
-        enemydirection = 'down';
-        break;
-      case 'ArrowLeft':
-        enemydirection = 'left';
-        break;
-      case 'ArrowRight':
-        enemydirection = 'right';
-        break;
-    }
-  } else if (state === 'single') {
+function moveEnemy(state) {
+  if (state === 'single') {
     console.log('enemy is in singleplayer mode')
     if (enemyDirectionChangeCounter === 0) {
       const randomDirection = Math.floor(Math.random() * 4);
@@ -167,31 +151,60 @@ function moveEnemy(state, direction) {
   }
 
   const enemyhead = { ...enemy[0] };
-  switch (enemydirection) {
-    case 'up':
-      enemyhead.y--;
-      if (enemyhead.y < 1) {
-        enemyhead.y = gridSize;
-      }
-      break;
-    case 'down':
-      enemyhead.y++;
-      if (enemyhead.y > gridSize) {
-        enemyhead.y = 1;
-      }
-      break;
-    case 'left':
-      enemyhead.x--;
-      if (enemyhead.x < 1) {
-        enemyhead.x = gridSize;
-      }
-      break;
-    case 'right':
-      enemyhead.x++;
-      if (enemyhead.x > gridSize) {
-        enemyhead.x = 1;
-      }
-      break;
+  if (state === 'single') {
+    switch (enemydirection) {
+      case 'up':
+        enemyhead.y--;
+        if (enemyhead.y < 1) {
+          enemyhead.y = gridSize;
+        }
+        break;
+      case 'down':
+        enemyhead.y++;
+        if (enemyhead.y > gridSize) {
+          enemyhead.y = 1;
+        }
+        break;
+      case 'left':
+        enemyhead.x--;
+        if (enemyhead.x < 1) {
+          enemyhead.x = gridSize;
+        }
+        break;
+      case 'right':
+        enemyhead.x++;
+        if (enemyhead.x > gridSize) {
+          enemyhead.x = 1;
+        }
+        break;
+    }
+  } else if (state === 'multiplayer') {
+    switch (multidirection) {
+      case 'up':
+        enemyhead.y--;
+        if (enemyhead.y < 1) {
+          enemyhead.y = gridSize;
+        }
+        break;
+      case 'down':
+        enemyhead.y++;
+        if (enemyhead.y > gridSize) {
+          enemyhead.y = 1;
+        }
+        break;
+      case 'left':
+        enemyhead.x--;
+        if (enemyhead.x < 1) {
+          enemyhead.x = gridSize;
+        }
+        break;
+      case 'right':
+        enemyhead.x++;
+        if (enemyhead.x > gridSize) {
+          enemyhead.x = 1;
+        }
+        break;
+    }
   }
 
   enemy.unshift(enemyhead);
@@ -219,16 +232,6 @@ function handleKeyPress(event) {
     event.preventDefault();
     state = 'single'
     console.log('single player mode started')
-    moveEnemy(state, event.code)
-    startGame(state);
-  } else if (
-    (!gameStarted && event.code === 'Enter') ||
-    (!gameStarted && event.key === ' ')
-  ) {
-    event.preventDefault();
-    state = 'multiplayer'
-    console.log('multiplayer mode started')
-    moveEnemy(state, event.code)
     startGame(state);
   } else {
     switch (event.key) {
@@ -252,7 +255,37 @@ function handleKeyPress(event) {
   }
 }
 
-document.addEventListener('keydown', handleKeyPress, moveEnemy);
+// Keypress event listener
+function handleEnemyPress(event) {
+  if (
+    (!gameStarted && event.code === 'Enter') ||
+    (!gameStarted && event.key === ' ')
+  ) {
+    event.preventDefault();
+    state = 'multiplayer'
+    console.log('multiplayer mode started')
+    moveEnemy(state)
+    startGame(state);
+  } else {
+    switch (event.key) {
+      case 'ArrowUp':
+        multidirection = 'up';
+        break;
+      case 'ArrowDown':
+        multidirection = 'down';
+        break;
+      case 'ArrowLeft':
+        multidirection = 'left';
+        break;
+      case 'ArrowRight':
+        multidirection = 'right';
+        break;
+    }
+  }
+}
+
+document.addEventListener('keydown', handleKeyPress);
+document.addEventListener('keydown', handleEnemyPress);
 
 function increaseSpeed() {
   //   console.log(gameSpeedDelay);

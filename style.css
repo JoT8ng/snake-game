@@ -11,6 +11,9 @@ body,
 .snake {
     background-color: #010a11;
 }
+.enemy {
+    background-color: #010a11;
+}
 
 #gameboard {
     display: grid;
@@ -58,6 +61,11 @@ display: none;
 
 .snake {
   border: #6aecff 5px dashed;
+  border-radius: 4px;
+}
+
+.enemy {
+  border: #ff3e11 5px dashed;
   border-radius: 4px;
 }
 

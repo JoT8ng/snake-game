@@ -13,11 +13,22 @@ let direction = 'right';
 let gameInterval;
 let gameSpeedDelay = 200;
 let gameStarted = false;
+let enemy = [];
+
+// Initialize enemy snake with 10 segments
+for (let i = 0; i < 10; i++) {
+  let pos = 5;
+  enemy.push({ x: pos++, y: pos++ });
+}
+
+// Counter for delaying direction change of enemy snake
+let enemyDirectionChangeCounter = 0;
 
 // Draw game map, snake, food
 function draw() {
   board.innerHTML = '';
   drawSnake();
+  drawEnemy();
   drawFood();
   updateScore();
 }
@@ -29,6 +40,15 @@ function drawSnake() {
     setPosition(snakeElement, segment);
     board.appendChild(snakeElement);
   });
+}
+
+// Draw enemy
+function drawEnemy() {
+  enemy.forEach((segment) => {
+    const enemyElement = createGameElement('div', 'enemy');
+    setPosition(enemyElement, segment);
+    board.appendChild(enemyElement)
+  })
 }
 
 // Create a snake or food cube/div
@@ -43,9 +63,6 @@ function setPosition(element, position) {
   element.style.gridColumn = position.x;
   element.style.gridRow = position.y;
 }
-
-// Testing draw function
-// draw();
 
 // Draw food function
 function drawFood() {
@@ -69,15 +86,27 @@ function move() {
   switch (direction) {
     case 'up':
       head.y--;
+      if (head.y < 1) {
+        head.y = gridSize;
+      }
       break;
     case 'down':
       head.y++;
+      if (head.y > gridSize) {
+        head.y = 1;
+      }
       break;
     case 'left':
       head.x--;
+      if (head.x < 1) {
+        head.x = gridSize;
+      }
       break;
     case 'right':
       head.x++;
+      if (head.x > gridSize) {
+        head.x = 1;
+      }
       break;
   }
 
@@ -88,22 +117,64 @@ function move() {
   if (head.x === food.x && head.y === food.y) {
     food = generateFood();
     increaseSpeed();
-    clearInterval(gameInterval); // Clear past interval
-    gameInterval = setInterval(() => {
-      move();
-      checkCollision();
-      draw();
-    }, gameSpeedDelay);
   } else {
     snake.pop();
   }
 }
 
-// Test moving
-// setInterval(() => {
-//   move(); // Move first
-//   draw(); // Then draw again new position
-// }, 200);
+// Move enemy snake
+function moveEnemy() {
+  if (enemyDirectionChangeCounter === 0) {
+    const randomDirection = Math.floor(Math.random() * 4);
+    switch (randomDirection) {
+      case 0: // Up
+        enemydirection = 'up';
+        break;
+      case 1: // Down
+        enemydirection = 'down';
+        break;
+      case 2: // Left
+        enemydirection = 'left';
+        break;
+      case 3: // Right
+        enemydirection = 'right';
+        break;
+    }
+    enemyDirectionChangeCounter = 3; // Reset the counter
+  }
+  enemyDirectionChangeCounter--;
+
+  const enemyhead = { ...enemy[0] };
+  switch (enemydirection) {
+    case 'up':
+      enemyhead.y--;
+      if (enemyhead.y < 1) {
+        enemyhead.y = gridSize;
+      }
+      break;
+    case 'down':
+      enemyhead.y++;
+      if (enemyhead.y > gridSize) {
+        enemyhead.y = 1;
+      }
+      break;
+    case 'left':
+      enemyhead.x--;
+      if (enemyhead.x < 1) {
+        enemyhead.x = gridSize;
+      }
+      break;
+    case 'right':
+      enemyhead.x++;
+      if (enemyhead.x > gridSize) {
+        enemyhead.x = 1;
+      }
+      break;
+  }
+
+  enemy.unshift(enemyhead);
+  enemy.pop();
+}
 
 // Start game function
 function startGame() {
@@ -111,6 +182,7 @@ function startGame() {
   instructionText.style.display = 'none';
   gameInterval = setInterval(() => {
     move();
+    moveEnemy();
     checkCollision();
     draw();
   }, gameSpeedDelay);
@@ -125,16 +197,20 @@ function handleKeyPress(event) {
     startGame();
   } else {
     switch (event.key) {
-      case 'ArrowUp':
+      case 'w':
+      case 'W':
         direction = 'up';
         break;
-      case 'ArrowDown':
+      case 's':
+      case 'S':
         direction = 'down';
         break;
-      case 'ArrowLeft':
+      case 'a':
+      case 'A':
         direction = 'left';
         break;
-      case 'ArrowRight':
+      case 'd':
+      case 'D':
         direction = 'right';
         break;
     }
@@ -159,8 +235,10 @@ function increaseSpeed() {
 function checkCollision() {
   const head = snake[0];
 
-  if (head.x < 1 || head.x > gridSize || head.y < 1 || head.y > gridSize) {
-    resetGame();
+  for (let i = 1; i < enemy.length; i++) {
+    if (head.x === enemy[i].x && head.y === enemy[i].y){
+      resetGame();
+    }
   }
 
   for (let i = 1; i < snake.length; i++) {
@@ -178,6 +256,12 @@ function resetGame() {
   direction = 'right';
   gameSpeedDelay = 200;
   updateScore();
+  enemy = [];
+  // Initialize enemy snake with 10 segments
+  for (let i = 0; i < 10; i++) {
+    let pos = 5;
+    enemy.push({ x: pos++, y: pos++ });
+  }
 }
 
 function updateScore() {

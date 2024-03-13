@@ -10,10 +10,12 @@ let snake = [{ x: 10, y: 10 }];
 let food = generateFood();
 let highScore = 0;
 let direction = 'right';
+let enemydirection = 'down';
 let gameInterval;
 let gameSpeedDelay = 200;
 let gameStarted = false;
 let enemy = [];
+let state = 'single';
 
 // Initialize enemy snake with 10 segments
 for (let i = 0; i < 10; i++) {
@@ -123,26 +125,46 @@ function move() {
 }
 
 // Move enemy snake
-function moveEnemy() {
-  if (enemyDirectionChangeCounter === 0) {
-    const randomDirection = Math.floor(Math.random() * 4);
-    switch (randomDirection) {
-      case 0: // Up
+function moveEnemy(state, direction) {
+  if (state === 'multiplayer') {
+    console.log('enemy is in multiplayer mode')
+    console.log(direction)
+    switch (direction) {
+      case 'ArrowUp':
         enemydirection = 'up';
         break;
-      case 1: // Down
+      case 'ArrowDown':
         enemydirection = 'down';
         break;
-      case 2: // Left
+      case 'ArrowLeft':
         enemydirection = 'left';
         break;
-      case 3: // Right
+      case 'ArrowRight':
         enemydirection = 'right';
         break;
     }
-    enemyDirectionChangeCounter = 3; // Reset the counter
+  } else if (state === 'single') {
+    console.log('enemy is in singleplayer mode')
+    if (enemyDirectionChangeCounter === 0) {
+      const randomDirection = Math.floor(Math.random() * 4);
+      switch (randomDirection) {
+        case 0: // Up
+          enemydirection = 'up';
+          break;
+        case 1: // Down
+          enemydirection = 'down';
+          break;
+        case 2: // Left
+          enemydirection = 'left';
+          break;
+        case 3: // Right
+          enemydirection = 'right';
+          break;
+      }
+      enemyDirectionChangeCounter = 3; // Reset the counter
+    }
+    enemyDirectionChangeCounter--;
   }
-  enemyDirectionChangeCounter--;
 
   const enemyhead = { ...enemy[0] };
   switch (enemydirection) {
@@ -177,12 +199,12 @@ function moveEnemy() {
 }
 
 // Start game function
-function startGame() {
+function startGame(state) {
   gameStarted = true; // Keep track of a running game
   instructionText.style.display = 'none';
   gameInterval = setInterval(() => {
     move();
-    moveEnemy();
+    moveEnemy(state);
     checkCollision();
     draw();
   }, gameSpeedDelay);
@@ -194,7 +216,20 @@ function handleKeyPress(event) {
     (!gameStarted && event.code === 'Space') ||
     (!gameStarted && event.key === ' ')
   ) {
-    startGame();
+    event.preventDefault();
+    state = 'single'
+    console.log('single player mode started')
+    moveEnemy(state, event.code)
+    startGame(state);
+  } else if (
+    (!gameStarted && event.code === 'Enter') ||
+    (!gameStarted && event.key === ' ')
+  ) {
+    event.preventDefault();
+    state = 'multiplayer'
+    console.log('multiplayer mode started')
+    moveEnemy(state, event.code)
+    startGame(state);
   } else {
     switch (event.key) {
       case 'w':
@@ -217,7 +252,7 @@ function handleKeyPress(event) {
   }
 }
 
-document.addEventListener('keydown', handleKeyPress);
+document.addEventListener('keydown', handleKeyPress, moveEnemy);
 
 function increaseSpeed() {
   //   console.log(gameSpeedDelay);

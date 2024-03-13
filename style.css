@@ -1,5 +1,6 @@
 body {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
@@ -29,14 +30,14 @@ body,
 
 #instruction-text {
     position: absolute;
-    top: 60%;
+    top: 55%;
     color: #6aecff;
     width: 300px;
     text-align: center;
     text-transform: capitalize;
     padding: 30px;
     margin: 0;
-  }
+}
   
 .scores {
 display: flex;
@@ -71,4 +72,22 @@ display: none;
 
 .food {
   background-color: #ff8111;
+}
+
+#text {
+  color: #6aecff;
+  width: 300px;
+  text-align: center;
+  text-transform: capitalize;
+  padding: 30px;
+  margin: 0;
+}
+
+#title {
+  color: #6aecff;
+  width: 300px;
+  text-align: center;
+  text-transform: capitalize;
+  padding: 30px;
+  margin: 0;
 }
